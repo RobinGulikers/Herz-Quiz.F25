@@ -343,7 +343,7 @@ document.getElementById("start-btn").addEventListener("click", ()=>{
   const rawInput = document.getElementById("name").value;
   const name = normalizeSpaces(rawInput);
   if(!isValidFullName(name)){
-    alert("Du sollst Vor– und Nachnamen eingeben.“).");
+    alert("Du sollst Vor– und Nachnamen eingeben).");
     return;
   }
   localStorage.setItem("playerName", name);
