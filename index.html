@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Quiz des Herzens</title>
+
+<style>
+body { margin:0; height:100vh; background:#0f0f0f; overflow:hidden; font-family:Arial,Helvetica,sans-serif; color:#fff; display:flex; justify-content:center; align-items:center; }
+.hearts { position:fixed; width:100%; height:100%; overflow:hidden; z-index:0; }
+.heart-bg { position:absolute; bottom:-50px; font-size:30px; color:rgba(255,80,80,0.25); animation:floatUp linear infinite; }
+@keyframes floatUp { from { transform:translateY(0); } to { transform:translateY(-120vh); } }
+
+.card { width:420px; padding:30px; border-radius:25px; border:3px solid #c62828; background:#1a1a1a; text-align:center; box-shadow:0 0 25px rgba(198,40,40,0.4); position:relative; z-index:2; margin:0 auto; transition:border-color 0.3s; }
+#heart-container { position:relative; height:80px; margin-bottom:15px; z-index:2; }
+#heart { font-size:70px; color:#ff4d4d; animation:pulse 1s infinite; }
+@keyframes pulse {0% {transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);} }
+
+.course { font-size:14px; letter-spacing:1px; color:#ff6b6b; margin-bottom:8px; }
+h1 { margin:5px 0; font-size:28px; }
+.subtitle { font-size:14px; color:#cccccc; margin-bottom:25px; }
+
+label { display:block; margin-bottom:8px; color:#ff5252; font-size:16px; }
+input { width:80%; padding:10px; border-radius:12px; border:none; outline:none; font-size:16px; text-align:center; margin-bottom:20px; }
+
+button { padding:12px 30px; border-radius:20px; border:none; font-size:16px; background:#c62828; color:white; cursor:pointer; }
+button:hover { background:#e53935; }
+
+.question-container { display:none; flex-direction:column; text-align:center; }
+
+/* ✅ Frage-Zähler (klein, ausgegraut) */
+.q-progress{
+  font-size:12px;
+  color:#9a9a9a;
+  margin-bottom:6px;
+  letter-spacing:0.3px;
+}
+
+.question-text { font-size:18px; margin-bottom:16px; }
+
+/* ✅ Antworten sauber untereinander + gleiche Größe */
+.answers-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:100%;
+}
+
+.answer-btn{
+  width:100%;
+  box-sizing:border-box;
+  background:#333;
+  color:white;
+  border:none;
+  border-radius:12px;
+  padding:12px 12px;
+  cursor:pointer;
+  font-size:16px;
+  transition:0.3s;
+  text-align:center;
+  min-height:46px;
+}
+.answer-btn:hover { background:#555; }
+
+.correct { background-color:#4CAF50 !important; }
+.wrong { background-color:#f44336 !important; }
+
+.feedback { margin-top:15px; font-size:16px; min-height:20px; }
+
+/* Kapitel 2 Lückentext */
+#chapter2-container { display:none; flex-direction:column; text-align:left; max-height:500px; overflow-y:auto; margin-top:20px; }
+#chapter2-text { background:#1a1a1a; padding:15px; border-radius:15px; border:2px solid #c62828; }
+.luecke {
+  display:inline-flex; justify-content:center; align-items:center;
+  min-width:110px; height:32px; padding:4px 8px; margin:4px 4px;
+  border:2px solid #c62828; border-radius:8px;
+  background:#111; color:#fff; font-weight:bold;
+  cursor:pointer;
+}
+.luecke:hover { background:#222; }
+.wordbank { margin-top:15px; }
+.wordbank span { background:#c62828; padding:5px 10px; border-radius:12px; margin:4px; cursor:pointer; display:inline-block; }
+.wordbank span.selected { background:#4CAF50; }
+#reset-btn, #chapter2-next-btn { margin-top:15px; padding:10px 20px; border-radius:15px; border:none; cursor:pointer; background:#c62828; color:white; }
+#reset-btn:hover, #chapter2-next-btn:hover { background:#e53935; }
+
+/* Ergebnisseite */
+#result-page { display:none; flex-direction:column; text-align:center; max-height:400px; overflow-y:auto; }
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #ffff00; padding:10px; text-align:center; }
+th { background:#c62828; color:#fff; }
+.table-wrap{ max-height:300px; overflow-y:auto; margin-top:20px; border-radius:12px; }
+</style>
+</head>
+
+<body>
+<div class="hearts" id="hearts"></div>
+
+<div class="card" id="card">
+  <div id="heart-container"><div id="heart">❤️</div></div>
+
+  <!-- Start -->
+  <div id="start-page">
+    <div class="course">Kurs: F25</div>
+    <h1>Quiz des Herzens</h1>
+    <div class="subtitle">von Robin Gulikers und Justin Hebben</div>
+    <label for="name">Wie heißt du?</label>
+    <input type="text" id="name" placeholder="Vor- und Nachname">
+    <button id="start-btn">Start</button>
+  </div>
+
+  <!-- Kapitel 1 -->
+  <div id="quiz-container" class="question-container">
+    <div id="qProgress" class="q-progress"></div>
+    <div id="question" class="question-text"></div>
+
+    <div class="answers-wrap">
+      <button class="answer-btn" id="answer0"></button>
+      <button class="answer-btn" id="answer1"></button>
+      <button class="answer-btn" id="answer2"></button>
+      <button class="answer-btn" id="answer3"></button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+    <button id="next-btn" style="display:none;margin-top:15px;">Nächste Frage</button>
+  </div>
+
+  <!-- Kapitel 2 -->
+  <div id="chapter2-container">
+    <div id="chapter2-text"></div>
+    <div class="wordbank" id="wordbank"></div>
+    <button id="reset-btn">Zurücksetzen</button>
+    <button id="chapter2-next-btn">Weiter</button>
+  </div>
+
+  <!-- Ergebnis -->
+  <div id="result-page">
+    <h1>Rangliste</h1>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Punkte</th></tr></thead>
+        <tbody id="ranking-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBGQhJ8LDyK-yqG11IVbv8EDE8bHYOBJIU",
+  authDomain: "quiz-des-herzens.firebaseapp.com",
+  projectId: "quiz-des-herzens",
+  storageBucket: "quiz-des-herzens.firebasestorage.app",
+  messagingSenderId: "700084611111",
+  appId: "1:700084611111:web:e7c630697e80fffe8cc602"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);// ===============================
+// Name / Alias / Device
+// ===============================
+const DEVICE_ID_KEY = "heartQuiz_deviceId_v1";
+
+function normalizeSpaces(str){ return (str || "").trim().replace(/\s+/g, " "); }
+function normalizeName(str){ return normalizeSpaces(str).toLocaleLowerCase("de-DE"); }
+
+function isValidFullName(str){
+  const cleaned = normalizeSpaces(str);
+  const parts = cleaned.split(" ").filter(Boolean);
+  return parts.length >= 2 && parts[0].length >= 2 && parts[1].length >= 2;
+}
+
+function toTitleCaseName(str){
+  const cleaned = normalizeSpaces(str);
+  return cleaned.split(" ").filter(Boolean)
+    .map(w => w.charAt(0).toLocaleUpperCase("de-DE") + w.slice(1).toLocaleLowerCase("de-DE"))
+    .join(" ");
+}
+
+// ✅ Alias (case-insensitive)
+function resolveDisplayName(rawName){
+  const norm = normalizeName(rawName);
+  if(norm === "gina neumann") return "Gina–Marie Neumann";
+  return toTitleCaseName(rawName);
+}
+
+function getOrCreateDeviceId(){
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if(!id){
+    id = "dev_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
+// ===============================
+// Firestore Ranking (pro Gerät bester Versuch)
+// ===============================
+async function saveScoreToFirestore(rawName, points){
+  const name = resolveDisplayName(rawName);
+  const deviceId = getOrCreateDeviceId();
+
+  await addDoc(collection(db, "ranking"), {
+    deviceId,
+    name,
+    points: Number(points) || 0,
+    createdAt: Date.now()
+  });
+}
+
+async function loadRankingFromFirestore(){
+  const qy = query(collection(db, "ranking"), orderBy("points", "desc"));
+  const snap = await getDocs(qy);
+
+  const bestByDevice = new Map();
+  snap.forEach(docu=>{
+    const d = docu.data();
+    if(!d || !d.deviceId) return;
+
+    const existing = bestByDevice.get(d.deviceId);
+    if(!existing || (d.points||0) > (existing.points||0)){
+      bestByDevice.set(d.deviceId, { name: d.name || "Unbekannt", points: d.points || 0 });
+    }
+  });
+
+  const arr = Array.from(bestByDevice.values());
+  arr.sort((a,b)=> (b.points||0) - (a.points||0));
+  return arr.slice(0, 50);
+}
+
+async function renderRanking(){
+  const tbody = document.getElementById("ranking-body");
+  tbody.innerHTML = "<tr><td colspan='3'>Lade Rangliste…</td></tr>";
+
+  try{
+    const ranking = await loadRankingFromFirestore();
+    tbody.innerHTML = "";
+
+    if(ranking.length === 0){
+      tbody.innerHTML = "<tr><td colspan='3'>Noch keine Einträge.</td></tr>";
+      return;
+    }
+
+    ranking.forEach((entry, idx)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${idx+1}</td><td>${entry.name}</td><td>${entry.points}</td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){
+    console.log(e);
+    tbody.innerHTML = "<tr><td colspan='3'>Fehler beim Laden (Firestore).</td></tr>";
+  }
+}
+
+// ===============================
+// Hintergrund-Herzen
+// ===============================
+const heartsContainer = document.getElementById("hearts");
+let bgHearts = [];
+for(let i=0;i<25;i++){
+  const h=document.createElement("div");
+  h.className="heart-bg";
+  h.innerHTML="❤️";
+  h.style.left=Math.random()*100+"vw";
+  h.style.animationDuration=(6+Math.random()*6)+"s";
+  h.style.fontSize=(20+Math.random()*30)+"px";
+  h.style.animationDelay=Math.random()*5+"s";
+  heartsContainer.appendChild(h);
+  bgHearts.push(h);
+}
+
+// ===============================
+// Kapitel 1: Originalfragen (20)
+// ===============================
+const quiz = [
+  {q:"Welche Kammer des Herzens pumpt Blut in den Lungenkreislauf?",a:["Linker Vorhof","Rechter Vorhof","Linke Kammer","Rechte Kammer"],correct:3},
+  {q:"Was ist die Hauptaufgabe der Arterien?",a:["Sie transportieren sauerstoffreiches Blut zum Herzen","Sie transportieren Blut vom Herzen weg zu den Organen und Geweben","Sie transportieren sauerstoffarmes Blut zum Herzen","Sie transportieren Blut innerhalb der Organe"],correct:1},
+  {q:"Welche Funktion hat das Herzklappen–System?",a:["Es speichert Blut","Es produziert Sauerstoff","Es macht eigentlich gar nichts","Es verhindert Rückfluss von Blut"],correct:3},
+  {q:"Welche Blutgefäße bringen Blut zum Herzen?",a:["Arterien","Venen","Kapillaren","Aorta"],correct:1},
+  {q:"Was ist eine häufige Ursache für eine erhöhte Herzfrequenz?",a:["Schlaf","Entspannung","Stress","Meditation"],correct:2},
+  {q:"Welche Struktur trennt die linke von der rechten Herzhälfte?",a:["Herzklappen","Kapillaren","Myokard","Septum"],correct:3},
+  {q:"Was ist die Aufgabe der Lungenvenen?",a:["Sie transportieren sauerstoffarmes Blut zum Herzen","Sie transportieren sauerstoffreiches Blut zum Herzen","Sie transportieren sauerstoffarmes Blut vom Herzen weg","Sie transportieren sauerstoffreiches Blut vom Herzen weg"],correct:1},
+  {q:"Was ist die Aufgabe der Segelklappen?",a:["Sie leiten das Blut in die Arterien","Sie speichern Blut","Sie verhindern den Rückfluss von Blut aus den Kammern in die Vorhöfe","Sie verhindern den Rückfluss von Blut aus den Vorhöfen in die Kammern"],correct:2},
+  {q:"Welche Struktur ist maßgeblich für die schnelle Weiterleitung des elektrischen Impulses in den Herzkammern verantwortlich?",a:["Purkinje–Fasern","His–Bündel","Sinusknoten","Kapillaren"],correct:0},
+  {q:"Was ist die Aufgabe der Taschenklappen?",a:["Sie verhindern den Rückfluss von Blut aus den Kammern in die Vorhöfe","Sie regulieren den Blutdruck in den Vorhöfen","Sie verhindern den Rückfluss von Blut aus den Arterien in die Kammern","Sie verhindern den Rückfluss von Blut aus den Kammern in die Arterien"],correct:2},
+  {q:"Was sind die kleinsten Blutgefäße in unserem Körper?",a:["Koronararterien","Purkinje–Fasern","Venen","Kapillaren"],correct:3},
+  {q:"Wie hoch ist der physiologische Ruhepuls eines gesunden Erwachsenen?",a:["30–40 Schläge pro Minute","60–80 Schläge pro Minute","90–110 Schläge pro Minute","über 120 Schläge pro Minute"],correct:1},
+  {q:"Welche Herzklappe befindet sich zwischen linker Vorhof und linker Kammer?",a:["Mitralklappe","Trikuspidalklappe","Aortenklappe","Pulmonalklappe"],correct:0},
+  {q:"Welche Aufgabe hat die Aorta?",a:["Blut in den Körperkreislauf transportieren","Blut in die Lunge transportieren","Blut zurück zum Herzen bringen","Blut speichern"],correct:0},
+  {q:"Welche Zellen des Herzens sind für die Erzeugung des elektrischen Impulses verantwortlich?",a:["Purkinje-Fasern","Cellulae pacemaker","Kapillaren","Myozyten"],correct:1},
+
+  {q:"Wie groß ist das menschliche Herz ungefähr?",a:["So groß wie ein Apfel","So groß wie ein Fußball","So groß wie die eigene Faust","So groß wie ein Tennisball"],correct:2},
+  {q:"Wo liegt das Herz im Körper?",a:["Links im Brustkorb direkt unter der Lunge","Mittig im Bauchraum","Im Mediastinum hinter dem Brustbein, leicht nach links verschoben","Direkt unter dem Zwerchfell"],correct:2},
+  {q:"Welche Phase bezeichnet die Kontraktion der Herzkammern?",a:["Diastole","Systole","Depolarisation","Repolarisation"],correct:1},
+  {q:"Wie viel Blut pumpt das Herz ungefähr pro Schlag (Schlagvolumen) beim Erwachsenen in Ruhe?",a:["ca. 10–20 ml","ca. 30–40 ml","ca. 70 ml","ca. 200 ml"],correct:2},
+  {q:"Welche Struktur bestimmt normalerweise den Herzrhythmus?",a:["AV-Knoten","His-Bündel","Purkinje-Fasern","Sinusknoten"],correct:3}
+];
+
+let currentQuestion=0;
+let mcScore=0;
+let lueckenScore=0;
+
+const heart=document.getElementById("heart");
+const card=document.getElementById("card");
+const startPage=document.getElementById("start-page");
+const quizContainer=document.getElementById("quiz-container");
+const qProgress=document.getElementById("qProgress");
+const questionText=document.getElementById("question");
+const feedback=document.getElementById("feedback");
+const nextBtn=document.getElementById("next-btn");
+const answerButtons=[
+  document.getElementById("answer0"),
+  document.getElementById("answer1"),
+  document.getElementById("answer2"),
+  document.getElementById("answer3")
+];
+
+const rightEmojis=["😍","🥰","🤩","🥳","😎","👏","👍","😇","😊","🎉","🤗"];
+const wrongEmojis=["🥲","😑","😡","🙄","🤕","💩","💀","🤡","🤦🏻‍♂️","😒","💔"];
+
+// Start
+document.getElementById("start-btn").addEventListener("click", ()=>{
+  const rawInput = document.getElementById("name").value;
+  const name = normalizeSpaces(rawInput);
+  if(!isValidFullName(name)){
+    alert("Bitte gib Vor- und Nachnamen ein (z.B. „Max Mustermann“).");
+    return;
+  }
+  localStorage.setItem("playerName", name);
+  startPage.style.display="none";
+  quizContainer.style.display="flex";
+  showQuestion();
+});
+
+document.getElementById("name").addEventListener("keydown",(e)=>{
+  if(e.key==="Enter") document.getElementById("start-btn").click();
+});
+
+function showQuestion(){
+  const q = quiz[currentQuestion];
+  qProgress.textContent = `Frage ${currentQuestion+1}/${quiz.length}`;
+  questionText.textContent = q.q;
+  feedback.textContent="";
+  nextBtn.style.display="none";
+
+  heart.textContent="❤️";
+  heart.style.animation="pulse 1s infinite";
+  card.style.borderColor="#c62828";
+  bgHearts.forEach(h=>h.innerHTML="❤️");
+
+  answerButtons.forEach((btn,i)=>{
+    btn.textContent=q.a[i];
+    btn.className="answer-btn";
+    btn.disabled=false;
+  });
+}
+
+answerButtons.forEach((btn,i)=>btn.addEventListener("click", ()=>{
+  const q = quiz[currentQuestion];
+  answerButtons.forEach(b=>b.disabled=true);
+
+  if(i===q.correct){
+    btn.classList.add("correct");
+    feedback.textContent="Richtig ✅";
+    const e = rightEmojis[Math.floor(Math.random()*rightEmojis.length)];
+    heart.textContent=e;
+    bgHearts.forEach(h=>h.innerHTML=e);
+    card.style.borderColor="#4CAF50";
+    mcScore++;
+  }else{
+    btn.classList.add("wrong");
+    answerButtons[q.correct].classList.add("correct");
+    feedback.textContent="Falsch ❌ Richtige Antwort: " + q.a[q.correct];
+    const e = wrongEmojis[Math.floor(Math.random()*wrongEmojis.length)];
+    heart.textContent=e;
+    heart.style.animation="";
+    bgHearts.forEach(h=>h.innerHTML=e);
+    card.style.borderColor="#c62828";
+  }
+  nextBtn.style.display="block";
+}));
+
+nextBtn.addEventListener("click", ()=>{
+  currentQuestion++;
+  if(currentQuestion>=quiz.length){
+    quizContainer.style.display="none";
+    document.getElementById("chapter2-container").style.display="flex";
+    startChapter2();
+  }else{
+    showQuestion();
+  }
+});
+
+// ======================
+// Kapitel 2 (Lückentext)
+// ======================
+const chapter2Text=`Das sauerstoffarme Blut aus dem Körper fließt über die *obere Hohlvene* und die *untere Hohlvene* in den *rechten Vorhof*. 
+Hier öffnet sich die *Trikuspidalklappe*, sodass das Blut in die *rechte Herzkammer* fließen kann.
+Bei der Kontraktion der rechten Kammer schließt sich die *Trikuspidalklappe* und die *Pulmonalklappe* öffnet sich, damit kein Blut zurück in den Vorhof fließt. 
+Das Blut wird in die *Pulmonalarterie* gepumpt und zur *Lunge* transportiert.
+In den *Lungenkapillaren* gibt das Blut *Kohlendioxid* ab und nimmt *Sauerstoff* auf.
+Das nun sauerstoffreiche Blut fließt über die *Lungenvenen* zurück in den *linken Vorhof*. 
+Die *Mitralklappe* öffnet sich, und das Blut strömt in die *linke Herzkammer*.
+Bei der Kontraktion der linken Kammer öffnet sich die *Aortenklappe*, und das sauerstoffreiche Blut wird in die *Aorta* gepumpt und gelangt in den *Körperkreislauf*.`;
+
+const luecken = chapter2Text.match(/\*([^\*]+)\*/g).map(e=>e.replace(/\*/g,''));
+const chapter2TextHTML = chapter2Text.replace(/\*([^\*]+)\*/g,'<span class="luecke" data-word="$1"></span>');
+const wordItems = luecken.map((w, i) => ({ id: i, word: w, used: false }));
+
+function startChapter2(){
+  const container=document.getElementById("chapter2-text");
+  container.innerHTML=chapter2TextHTML;
+  const bank=document.getElementById("wordbank");
+  let selectedId = null;
+
+  function renderBank(){
+    bank.innerHTML = "";
+    wordItems.forEach(item=>{
+      if(item.used) return;
+      const span=document.createElement("span");
+      span.textContent=item.word;
+      if(selectedId === item.id) span.classList.add("selected");
+      span.addEventListener("click", ()=>{
+        selectedId = item.id;
+        renderBank();
+      });
+      bank.appendChild(span);
+    });
+  }
+  renderBank();
+
+  container.querySelectorAll(".luecke").forEach(l=>{
+    l.addEventListener("click", ()=>{
+      if(selectedId === null) return;
+
+      const prevId = l.dataset.filledId;
+      if(prevId !== undefined && prevId !== ""){
+        const prevItem = wordItems[Number(prevId)];
+        if(prevItem) prevItem.used = false;
+      }
+
+      const item = wordItems[selectedId];
+      l.textContent = item.word;
+      l.dataset.filledId = String(item.id);
+      item.used = true;
+
+      selectedId = null;
+      renderBank();
+    });
+  });
+
+  document.getElementById("reset-btn").onclick = () => {
+    selectedId = null;
+    wordItems.forEach(it=>it.used=false);
+    container.querySelectorAll(".luecke").forEach(l=>{
+      l.textContent = "";
+      l.dataset.filledId = "";
+    });
+    renderBank();
+  };
+
+  document.getElementById("chapter2-next-btn").onclick = async () => {
+    lueckenScore = 0;
+
+    const blanks = Array.from(container.querySelectorAll(".luecke"));
+
+    // obere/untere Hohlvene dürfen getauscht werden
+    const venaOber = blanks.find(b => b.dataset.word === "obere Hohlvene");
+    const venaUnter = blanks.find(b => b.dataset.word === "untere Hohlvene");
+    const need = new Set(["obere Hohlvene","untere Hohlvene"]);
+
+    let venaHandled = false;
+    if (venaOber && venaUnter) {
+      const a = (venaOber.textContent || "").trim();
+      const b = (venaUnter.textContent || "").trim();
+      if (need.has(a) && need.has(b) && a !== "" && b !== "" && a !== b) {
+        lueckenScore += 2;
+        venaHandled = true;
+      }
+    }
+
+    blanks.forEach(l=>{
+      const expected = l.dataset.word;
+      const filled = (l.textContent || "").trim();
+      if (venaHandled && (expected === "obere Hohlvene" || expected === "untere Hohlvene")) return;
+      if(filled === expected) lueckenScore++;
+    });
+
+    // ✅ Punkte x10
+    const totalScore = (mcScore + lueckenScore) * 10;
+
+    const rawName = localStorage.getItem("playerName") || "Unbekannt";
+    const safeName = normalizeSpaces(rawName);
+
+    try{
+      await saveScoreToFirestore(safeName, totalScore);
+    }catch(e){
+      console.log("Firestore Save Error:", e);
+      alert("Konnte nicht speichern (Firestore). Prüfe Internet & Firestore-Regeln.");
+    }
+
+    document.getElementById("chapter2-container").style.display="none";
+    document.getElementById("result-page").style.display="flex";
+
+    heart.textContent="🏆";
+    bgHearts.forEach(h=>h.innerHTML="🏆");
+    card.style.borderColor="#FFD700";
+
+    await renderRanking();
+  };
+}
+
+</script>
+</body>
+</html>
