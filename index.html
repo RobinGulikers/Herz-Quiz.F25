@@ -146,7 +146,7 @@ th { background:#c62828; color:#fff; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBGQhJ8LDyK-yqG11IVbv8EDE8bHYOBJIU",
@@ -193,21 +193,39 @@ function getOrCreateDeviceId(){
     localStorage.setItem(DEVICE_ID_KEY, id);
   }
   return id;
-}
-
-// ===============================
+}// ===============================
 // Firestore Ranking (pro Gerät bester Versuch)
 // ===============================
 async function saveScoreToFirestore(rawName, points){
   const name = resolveDisplayName(rawName);
   const deviceId = getOrCreateDeviceId();
 
-  await addDoc(collection(db, "ranking"), {
+  const newPoints = Number(points) || 0;
+  const ref = doc(db, "ranking", deviceId);
+
+  // ✅ Nur speichern, wenn besser als bisher (oder noch kein Eintrag existiert)
+  try{
+    const existingSnap = await getDoc(ref);
+    if(existingSnap.exists()){
+      const old = existingSnap.data() || {};
+      const oldPoints = Number(old.points) || 0;
+
+      if(newPoints <= oldPoints){
+        // nicht besser -> nichts überschreiben
+        return;
+      }
+    }
+  }catch(e){
+    // falls Lesen wegen Regeln fehlschlägt, versuchen wir trotzdem zu schreiben
+    console.log("Firestore Read (best score) warn:", e);
+  }
+
+  await setDoc(ref, {
     deviceId,
     name,
-    points: Number(points) || 0,
+    points: newPoints,
     createdAt: Date.now()
-  });
+  }, { merge: true });
 }
 
 async function loadRankingFromFirestore(){
@@ -391,9 +409,7 @@ nextBtn.addEventListener("click", ()=>{
   }else{
     showQuestion();
   }
-});
-
-// ======================
+});// ======================
 // Kapitel 2 (Lückentext)
 // ======================
 const chapter2Text=`Das sauerstoffarme Blut aus dem Körper fließt über die *obere Hohlvene* und die *untere Hohlvene* in den *rechten Vorhof*. 
