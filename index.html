@@ -89,6 +89,44 @@ table { width:100%; border-collapse:collapse; }
 th, td { border:1px solid #ffff00; padding:10px; text-align:center; }
 th { background:#c62828; color:#fff; }
 .table-wrap{ max-height:300px; overflow-y:auto; margin-top:20px; border-radius:12px; }
+
+/* ✅ Custom Modal für Name (ersetzt alert) */
+#nameModalOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.72);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+#nameModal{
+  background:#1a1a1a;
+  border:2px solid #c62828;
+  border-radius:20px;
+  padding:22px 18px;
+  width:85%;
+  max-width:360px;
+  box-shadow:0 0 25px rgba(198,40,40,0.35);
+  text-align:center;
+}
+#nameModal p{
+  margin:0;
+  color:#fff;
+  font-size:16px;
+  line-height:1.35;
+}
+#nameModalOk{
+  margin-top:14px;
+  padding:10px 26px;
+  border-radius:20px;
+  border:none;
+  background:#c62828;
+  color:#fff;
+  cursor:pointer;
+  font-size:16px;
+}
+#nameModalOk:hover{ background:#e53935; }
 </style>
 </head>
 
@@ -144,6 +182,14 @@ th { background:#c62828; color:#fff; }
   </div>
 </div>
 
+<!-- ✅ Custom Modal (ersetzt das Browser-Fenster) -->
+<div id="nameModalOverlay">
+  <div id="nameModal" role="dialog" aria-modal="true" aria-labelledby="nameModalText">
+    <p id="nameModalText">Du sollst Vor– und Nachnamen eingeben</p>
+    <button id="nameModalOk">OK</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
@@ -193,7 +239,28 @@ function getOrCreateDeviceId(){
     localStorage.setItem(DEVICE_ID_KEY, id);
   }
   return id;
-}// ===============================
+}
+
+/* ✅ Custom Modal Steuerung (statt alert) */
+const nameModalOverlay = document.getElementById("nameModalOverlay");
+const nameModalOk = document.getElementById("nameModalOk");
+
+function openNameModal(){
+  nameModalOverlay.style.display = "flex";
+}
+function closeNameModal(){
+  nameModalOverlay.style.display = "none";
+}
+
+nameModalOk.addEventListener("click", closeNameModal);
+nameModalOverlay.addEventListener("click", (e)=>{
+  if(e.target === nameModalOverlay) closeNameModal();
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape" && nameModalOverlay.style.display === "flex") closeNameModal();
+});
+
+// ===============================
 // Firestore Ranking (pro Gerät bester Versuch)
 // ===============================
 async function saveScoreToFirestore(rawName, points){
@@ -343,7 +410,7 @@ document.getElementById("start-btn").addEventListener("click", ()=>{
   const rawInput = document.getElementById("name").value;
   const name = normalizeSpaces(rawInput);
   if(!isValidFullName(name)){
-    alert("Du sollst Vor– und Nachnamen eingeben");
+    openNameModal();   // ✅ statt alert()
     return;
   }
   localStorage.setItem("playerName", name);
@@ -409,7 +476,9 @@ nextBtn.addEventListener("click", ()=>{
   }else{
     showQuestion();
   }
-});// ======================
+});
+
+// ======= SPLIT HIER =======// ======================
 // Kapitel 2 (Lückentext)
 // ======================
 const chapter2Text=`Das sauerstoffarme Blut aus dem Körper fließt über die *obere Hohlvene* und die *untere Hohlvene* in den *rechten Vorhof*. 
