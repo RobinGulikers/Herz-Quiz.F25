@@ -77,11 +77,35 @@ button:hover { background:#e53935; }
   cursor:pointer;
 }
 .luecke:hover { background:#222; }
+
+/* ✅ Nach Auswertung: richtig/falsch sichtbar */
+.luecke.good{
+  border-color:#4CAF50 !important;
+  background:#0f1b12 !important;
+}
+.luecke.bad{
+  border-color:#f44336 !important;
+  background:#1b0f0f !important;
+}
+.luecke.locked{
+  cursor:default;
+  opacity:0.95;
+}
+
 .wordbank { margin-top:15px; }
 .wordbank span { background:#c62828; padding:5px 10px; border-radius:12px; margin:4px; cursor:pointer; display:inline-block; }
 .wordbank span.selected { background:#4CAF50; }
+.wordbank span.disabled { opacity:0.45; cursor:default; }
+
 #reset-btn, #chapter2-next-btn { margin-top:15px; padding:10px 20px; border-radius:15px; border:none; cursor:pointer; background:#c62828; color:white; }
 #reset-btn:hover, #chapter2-next-btn:hover { background:#e53935; }
+
+#chapter2-feedback{
+  margin-top:12px;
+  min-height:18px;
+  font-size:14px;
+  color:#cccccc;
+}
 
 /* Ergebnisseite */
 #result-page { display:none; flex-direction:column; text-align:center; max-height:400px; overflow-y:auto; }
@@ -89,6 +113,15 @@ table { width:100%; border-collapse:collapse; }
 th, td { border:1px solid #ffff00; padding:10px; text-align:center; }
 th { background:#c62828; color:#fff; }
 .table-wrap{ max-height:300px; overflow-y:auto; margin-top:20px; border-radius:12px; }
+
+/* ✅ eigenen Rang hervorheben */
+tr.me-row td{
+  background:rgba(76, 175, 80, 0.18);
+  font-weight:bold;
+}
+tr.me-row td:first-child{
+  border-left:3px solid #4CAF50;
+}
 
 /* ✅ Custom Modal für Name (ersetzt alert) */
 #nameModalOverlay{
@@ -168,6 +201,7 @@ th { background:#c62828; color:#fff; }
     <div class="wordbank" id="wordbank"></div>
     <button id="reset-btn">Zurücksetzen</button>
     <button id="chapter2-next-btn">Weiter</button>
+    <div id="chapter2-feedback"></div>
   </div>
 
   <!-- Ergebnis -->
@@ -204,7 +238,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);// ===============================
+const db = getFirestore(app);
+
+// ===============================
 // Name / Alias / Device
 // ===============================
 const DEVICE_ID_KEY = "heartQuiz_deviceId_v1";
@@ -260,6 +296,16 @@ document.addEventListener("keydown", (e)=>{
   if(e.key === "Escape" && nameModalOverlay.style.display === "flex") closeNameModal();
 });
 
+/* ✅ Helfer: Array mischen (Fisher-Yates) */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 // ===============================
 // Firestore Ranking (pro Gerät bester Versuch)
 // ===============================
@@ -278,12 +324,10 @@ async function saveScoreToFirestore(rawName, points){
       const oldPoints = Number(old.points) || 0;
 
       if(newPoints <= oldPoints){
-        // nicht besser -> nichts überschreiben
         return;
       }
     }
   }catch(e){
-    // falls Lesen wegen Regeln fehlschlägt, versuchen wir trotzdem zu schreiben
     console.log("Firestore Read (best score) warn:", e);
   }
 
@@ -306,7 +350,7 @@ async function loadRankingFromFirestore(){
 
     const existing = bestByDevice.get(d.deviceId);
     if(!existing || (d.points||0) > (existing.points||0)){
-      bestByDevice.set(d.deviceId, { name: d.name || "Unbekannt", points: d.points || 0 });
+      bestByDevice.set(d.deviceId, { deviceId: d.deviceId, name: d.name || "Unbekannt", points: d.points || 0 });
     }
   });
 
@@ -328,8 +372,11 @@ async function renderRanking(){
       return;
     }
 
+    const myDeviceId = getOrCreateDeviceId();
+
     ranking.forEach((entry, idx)=>{
       const tr = document.createElement("tr");
+      if(entry.deviceId === myDeviceId) tr.classList.add("me-row");
       tr.innerHTML = `<td>${idx+1}</td><td>${entry.name}</td><td>${entry.points}</td>`;
       tbody.appendChild(tr);
     });
@@ -367,7 +414,7 @@ const quiz = [
   {q:"Was ist eine häufige Ursache für eine erhöhte Herzfrequenz?",a:["Schlaf","Entspannung","Stress","Meditation"],correct:2},
   {q:"Welche Struktur trennt die linke von der rechten Herzhälfte?",a:["Herzklappen","Kapillaren","Myokard","Septum"],correct:3},
   {q:"Was ist die Aufgabe der Lungenvenen?",a:["Sie transportieren sauerstoffarmes Blut zum Herzen","Sie transportieren sauerstoffreiches Blut zum Herzen","Sie transportieren sauerstoffarmes Blut vom Herzen weg","Sie transportieren sauerstoffreiches Blut vom Herzen weg"],correct:1},
-  {q:"Was ist die Aufgabe der Segelklappen?",a:["Sie leiten das Blut in die Arterien","Sie speichern Blut","Sie verhindern den Rückfluss von Blut aus den Kammern in die Vorhöfe","Sie verhindern den Rückfluss von Blut aus den Vorhöfen in die Kammern"],correct:2},
+  {q:"Was ist die Aufgabe der Segelklappen?",a:["Sie leiten das Blut in die Arterien","Sie speichern Blut","Sie verhindern den Rückfluss von Blut aus den Kammern in die Vorhöfe","Sie verhindern den Rückfluss von Blut aus den Vorhöfe in die Kammern"],correct:2},
   {q:"Welche Struktur ist maßgeblich für die schnelle Weiterleitung des elektrischen Impulses in den Herzkammern verantwortlich?",a:["Purkinje–Fasern","His–Bündel","Sinusknoten","Kapillaren"],correct:0},
   {q:"Was ist die Aufgabe der Taschenklappen?",a:["Sie verhindern den Rückfluss von Blut aus den Kammern in die Vorhöfe","Sie regulieren den Blutdruck in den Vorhöfen","Sie verhindern den Rückfluss von Blut aus den Arterien in die Kammern","Sie verhindern den Rückfluss von Blut aus den Kammern in die Arterien"],correct:2},
   {q:"Was sind die kleinsten Blutgefäße in unserem Körper?",a:["Koronararterien","Purkinje–Fasern","Venen","Kapillaren"],correct:3},
@@ -375,7 +422,6 @@ const quiz = [
   {q:"Welche Herzklappe befindet sich zwischen linker Vorhof und linker Kammer?",a:["Mitralklappe","Trikuspidalklappe","Aortenklappe","Pulmonalklappe"],correct:0},
   {q:"Welche Aufgabe hat die Aorta?",a:["Blut in den Körperkreislauf transportieren","Blut in die Lunge transportieren","Blut zurück zum Herzen bringen","Blut speichern"],correct:0},
   {q:"Welche Zellen des Herzens sind für die Erzeugung des elektrischen Impulses verantwortlich?",a:["Purkinje-Fasern","Cellulae pacemaker","Kapillaren","Myozyten"],correct:1},
-
   {q:"Wie groß ist das menschliche Herz ungefähr?",a:["So groß wie ein Apfel","So groß wie ein Fußball","So groß wie die eigene Faust","So groß wie ein Tennisball"],correct:2},
   {q:"Wo liegt das Herz im Körper?",a:["Links im Brustkorb direkt unter der Lunge","Mittig im Bauchraum","Im Mediastinum hinter dem Brustbein, leicht nach links verschoben","Direkt unter dem Zwerchfell"],correct:2},
   {q:"Welche Phase bezeichnet die Kontraktion der Herzkammern?",a:["Diastole","Systole","Depolarisation","Repolarisation"],correct:1},
@@ -410,7 +456,7 @@ document.getElementById("start-btn").addEventListener("click", ()=>{
   const rawInput = document.getElementById("name").value;
   const name = normalizeSpaces(rawInput);
   if(!isValidFullName(name)){
-    openNameModal();   // ✅ statt alert()
+    openNameModal();
     return;
   }
   localStorage.setItem("playerName", name);
@@ -457,7 +503,7 @@ answerButtons.forEach((btn,i)=>btn.addEventListener("click", ()=>{
   }else{
     btn.classList.add("wrong");
     answerButtons[q.correct].classList.add("correct");
-    feedback.textContent="Falsch ❌ Richtige Antwort: " + q.a[q.correct];
+    feedback.textContent="Falsch ❌";
     const e = wrongEmojis[Math.floor(Math.random()*wrongEmojis.length)];
     heart.textContent=e;
     heart.style.animation="";
@@ -497,27 +543,61 @@ const wordItems = luecken.map((w, i) => ({ id: i, word: w, used: false }));
 function startChapter2(){
   const container=document.getElementById("chapter2-text");
   container.innerHTML=chapter2TextHTML;
+
   const bank=document.getElementById("wordbank");
+  const feedbackEl=document.getElementById("chapter2-feedback");
+  const nextBtn=document.getElementById("chapter2-next-btn");
+  const resetBtn=document.getElementById("reset-btn");
+
   let selectedId = null;
+
+  // ✅ Wörterbank: einmalig gemischt, bleibt dann stabil (damit’s nicht nervig springt)
+  const order = shuffle(wordItems.map(it => it.id));
+
+  // ✅ Zustand: erst auswerten & zeigen, dann weiter zur Rangliste
+  let graded = false;
+  let totalScore = 0;
+  let savedOnce = false;
 
   function renderBank(){
     bank.innerHTML = "";
-    wordItems.forEach(item=>{
+    order.forEach(id=>{
+      const item = wordItems[id];
       if(item.used) return;
+
       const span=document.createElement("span");
       span.textContent=item.word;
       if(selectedId === item.id) span.classList.add("selected");
+      if(graded) span.classList.add("disabled");
+
       span.addEventListener("click", ()=>{
+        if(graded) return;
         selectedId = item.id;
         renderBank();
       });
+
       bank.appendChild(span);
     });
   }
   renderBank();
 
+  function lockChapter2(){
+    // bank & reset deaktivieren
+    bank.querySelectorAll("span").forEach(s=>s.classList.add("disabled"));
+    resetBtn.disabled = true;
+    resetBtn.style.opacity = "0.5";
+    resetBtn.style.cursor = "default";
+
+    // lücken klick deaktivieren
+    container.querySelectorAll(".luecke").forEach(l=>{
+      l.classList.add("locked");
+      l.style.pointerEvents = "none";
+    });
+  }
+
   container.querySelectorAll(".luecke").forEach(l=>{
     l.addEventListener("click", ()=>{
+      if(graded) return;
       if(selectedId === null) return;
 
       const prevId = l.dataset.filledId;
@@ -536,17 +616,36 @@ function startChapter2(){
     });
   });
 
-  document.getElementById("reset-btn").onclick = () => {
+  resetBtn.onclick = () => {
+    if(graded) return;
     selectedId = null;
     wordItems.forEach(it=>it.used=false);
     container.querySelectorAll(".luecke").forEach(l=>{
       l.textContent = "";
       l.dataset.filledId = "";
+      l.classList.remove("good","bad","locked");
+      l.style.pointerEvents = "";
     });
+    feedbackEl.textContent = "";
     renderBank();
   };
 
-  document.getElementById("chapter2-next-btn").onclick = async () => {
+  nextBtn.onclick = async () => {
+    // 2. Klick: zur Rangliste
+    if(graded){
+      document.getElementById("chapter2-container").style.display="none";
+      document.getElementById("result-page").style.display="flex";
+
+      heart.textContent="🏆";
+      bgHearts.forEach(h=>h.innerHTML="🏆");
+      card.style.borderColor="#FFD700";
+
+      await renderRanking();
+      return;
+    }
+
+    // 1. Klick: auswerten + richtig/falsch markieren
+    graded = true;
     lueckenScore = 0;
 
     const blanks = Array.from(container.querySelectorAll(".luecke"));
@@ -563,37 +662,50 @@ function startChapter2(){
       if (need.has(a) && need.has(b) && a !== "" && b !== "" && a !== b) {
         lueckenScore += 2;
         venaHandled = true;
+
+        venaOber.classList.add("good");
+        venaUnter.classList.add("good");
       }
     }
 
     blanks.forEach(l=>{
       const expected = l.dataset.word;
       const filled = (l.textContent || "").trim();
+
+      // schon als richtig markiert (ober/untere Hohlvene)
       if (venaHandled && (expected === "obere Hohlvene" || expected === "untere Hohlvene")) return;
-      if(filled === expected) lueckenScore++;
+
+      if(filled === expected){
+        lueckenScore++;
+        l.classList.add("good");
+      }else{
+        l.classList.add("bad");
+        l.title = "Richtig wäre: " + expected;
+      }
     });
 
     // ✅ Punkte x10
-    const totalScore = (mcScore + lueckenScore) * 10;
+    totalScore = (mcScore + lueckenScore) * 10;
 
-    const rawName = localStorage.getItem("playerName") || "Unbekannt";
-    const safeName = normalizeSpaces(rawName);
+    // speichern (nur einmal)
+    if(!savedOnce){
+      savedOnce = true;
+      const rawName = localStorage.getItem("playerName") || "Unbekannt";
+      const safeName = normalizeSpaces(rawName);
 
-    try{
-      await saveScoreToFirestore(safeName, totalScore);
-    }catch(e){
-      console.log("Firestore Save Error:", e);
-      alert("Konnte nicht speichern (Firestore). Prüfe Internet & Firestore-Regeln.");
+      try{
+        await saveScoreToFirestore(safeName, totalScore);
+      }catch(e){
+        console.log("Firestore Save Error:", e);
+        alert("Konnte nicht speichern (Firestore). Prüfe Internet & Firestore-Regeln.");
+      }
     }
 
-    document.getElementById("chapter2-container").style.display="none";
-    document.getElementById("result-page").style.display="flex";
-
-    heart.textContent="🏆";
-    bgHearts.forEach(h=>h.innerHTML="🏆");
-    card.style.borderColor="#FFD700";
-
-    await renderRanking();
+    // UI: sperren + Hinweis + Button ändern
+    lockChapter2();
+    feedbackEl.textContent = `Auswertung fertig ✅ Du hast im Lückentext ${lueckenScore} Punkte. (Gesamt: ${totalScore})`;
+    nextBtn.textContent = "Zur Rangliste";
+    renderBank();
   };
 }
 
