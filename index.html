@@ -342,11 +342,30 @@ tr.me-row td:first-child{
   font-size:16px;
 }
 #nameModalOk:hover{ background:#e53935; }
+
+/* ✅ Punkteanzeige (immer sichtbar im Basic-Quiz bis Risiko) */
+#scoreBoard{
+  position:fixed;
+  top:15px;
+  right:20px;
+  background:#1a1a1a;
+  border:2px solid #c62828;
+  padding:8px 14px;
+  border-radius:14px;
+  font-weight:bold;
+  color:#fff;
+  box-shadow:0 0 14px rgba(198,40,40,0.35);
+  z-index:99999;
+  display:none; /* wird beim Start eingeblendet */
+}
 </style>
 </head>
 
 <body>
 <div class="hearts" id="hearts"></div>
+
+<!-- ✅ Scoreboard -->
+<div id="scoreBoard">Punkte: <span id="scoreValue">0</span></div>
 
 <div class="card" id="card">
   <div id="heart-container"><div id="heart">❤️</div></div>
@@ -473,6 +492,34 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ===============================
+// Scoreboard (Basic bis Risiko)
+// ===============================
+const scoreBoard = document.getElementById("scoreBoard");
+const scoreValue = document.getElementById("scoreValue");
+
+function getDisplayedPoints(){
+  // Kapitel 1: mcScore zählt live (je 10 Punkte)
+  // Kapitel 2 (vor Auswertung): weiterhin mcScore * 10
+  // Nach Kapitel 2 Auswertung: baseScore (berechnet)
+  // Risiko: baseScore bleibt sichtbar (HUD zeigt zusätzlich Risiko-Topf)
+  if(baseScore > 0) return baseScore;
+  return (mcScore * 10);
+}
+
+function updateScoreDisplay(){
+  scoreValue.textContent = String(getDisplayedPoints());
+}
+
+function showScoreboard(){
+  scoreBoard.style.display = "block";
+  updateScoreDisplay();
+}
+
+function hideScoreboard(){
+  scoreBoard.style.display = "none";
+}
+
+// ===============================
 // Name / Alias / Device
 // ===============================
 const DEVICE_ID_KEY = "heartQuiz_deviceId_v1";
@@ -536,7 +583,9 @@ function shuffle(arr){
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}// ===============================
+}
+
+// ===============================
 // Firestore Ranking (pro Gerät bester Versuch)
 // ===============================
 async function saveScoreToFirestore(rawName, points){
@@ -695,9 +744,23 @@ document.getElementById("start-btn").addEventListener("click", ()=>{
     openNameModal();
     return;
   }
+
+  // ✅ Reset für neuen Run + Scoreboard an
+  currentQuestion = 0;
+  mcScore = 0;
+  lueckenScore = 0;
+  baseScore = 0;
+  riskScore = 0;
+  finalScore = 0;
+  savedOnce = false;
+
   localStorage.setItem("playerName", name);
   startPage.style.display="none";
   quizContainer.style.display="flex";
+
+  showScoreboard();
+  updateScoreDisplay();
+
   showQuestion();
 });
 
@@ -722,6 +785,8 @@ function showQuestion(){
     btn.className="answer-btn";
     btn.disabled=false;
   });
+
+  updateScoreDisplay();
 }
 
 answerButtons.forEach((btn,i)=>btn.addEventListener("click", ()=>{
@@ -736,6 +801,7 @@ answerButtons.forEach((btn,i)=>btn.addEventListener("click", ()=>{
     bgHearts.forEach(h=>h.innerHTML=e);
     card.style.borderColor="#4CAF50";
     mcScore++;
+    updateScoreDisplay();
   }else{
     btn.classList.add("wrong");
     answerButtons[q.correct].classList.add("correct");
@@ -745,6 +811,7 @@ answerButtons.forEach((btn,i)=>btn.addEventListener("click", ()=>{
     heart.style.animation="";
     bgHearts.forEach(h=>h.innerHTML=e);
     card.style.borderColor="#c62828";
+    updateScoreDisplay();
   }
   nextBtn.style.display="block";
 }));
@@ -754,13 +821,12 @@ nextBtn.addEventListener("click", ()=>{
   if(currentQuestion>=quiz.length){
     quizContainer.style.display="none";
     document.getElementById("chapter2-container").style.display="flex";
+    updateScoreDisplay();
     startChapter2();
   }else{
     showQuestion();
   }
-});
-
-// ======= SPLIT HIER (2/4 Ende) =======//// ======================
+});// ======================
 // Kapitel 2 (Lückentext)
 // ======================
 const chapter2Text=`Das sauerstoffarme Blut aus dem Körper fließt über die *obere Hohlvene* und die *untere Hohlvene* in den *rechten Vorhof*. 
@@ -866,6 +932,7 @@ function startChapter2(){
     // 2. Klick: weiter zum Risikomodus
     if(graded){
       document.getElementById("chapter2-container").style.display="none";
+      updateScoreDisplay();
       showRiskEntry();
       return;
     }
@@ -910,6 +977,7 @@ function startChapter2(){
 
     // ✅ Basis = (MC + Lücken) * 10
     baseScore = (mcScore + lueckenScore) * 10;
+    updateScoreDisplay();
 
     lockChapter2();
     feedbackEl.textContent = `Auswertung fertig ✅ Du hast im Lückentext ${lueckenScore} Punkte. (Basis: ${baseScore})`;
@@ -1024,6 +1092,9 @@ function showRiskEntry(){
   riskEntry.style.display="flex";
   riskContainer.style.display="none";
   document.getElementById("risk-entry-note").textContent = `Deine Basis ist ${baseScore} Punkte. Risikopunkte kommen oben drauf.`;
+
+  // ✅ Scoreboard bleibt bis hier sichtbar
+  updateScoreDisplay();
 }
 
 riskSkipBtn.addEventListener("click", async ()=>{
@@ -1137,9 +1208,7 @@ function beginRiskLevel(level){
   if(level === 4) renderLevel4_TrueFalse6();
   if(level === 5) renderLevel5_FindWrong9();
   if(level === 6) renderLevel6_Buchstabensalat();
-}
-
-// ======= SPLIT HIER (3/4 Ende) =======//// ======================
+}// ======================
 // LEVEL 1: Match (Intro minimal, Level selbst nur Satz 2)
 // ======================
 function renderLevel1_Match(){
@@ -1420,7 +1489,7 @@ function renderLevel4_TrueFalse6(){
 }
 
 // ======================
-// LEVEL 5: Falsche Aussage (9 Optionen)
+// LEVEL 5: Falsche Aussage (9 Optionen) ✅ Aussage korrigiert
 // ======================
 function renderLevel5_FindWrong9(){
   riskActionBtn.textContent = "Bestätigen";
@@ -1435,9 +1504,11 @@ function renderLevel5_FindWrong9(){
     "Das Septum trennt die rechte und linke Herzhälfte.",
     "Die Lungenarterie führt sauerstoffarmes Blut zur Lunge."
   ];
-  const wrong = "Alle Venen führen Blut immer zum Herzen.";
-  const options = truths.concat([wrong]);
 
+  // ✅ wirklich falsche Aussage
+  const wrong = "Venen transportieren immer sauerstoffreiches Blut zum Herzen.";
+
+  const options = truths.concat([wrong]);
   levelState.pick = null;
 
   riskArea.innerHTML = `
@@ -1632,6 +1703,9 @@ async function finalizeAndShowRanking(){
   stopRiskTimer();
   clearBuchstabenTimers();
   try{ window.__bsTriggerLastMinute = null; }catch(e){}
+
+  // ✅ Scoreboard ausblenden auf Rangliste
+  hideScoreboard();
 
   riskEntry.style.display = "none";
   riskContainer.style.display = "none";
