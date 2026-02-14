@@ -78,7 +78,6 @@ button:hover { background:#e53935; }
 }
 .luecke:hover { background:#222; }
 
-/* ✅ Nach Auswertung: richtig/falsch sichtbar */
 .luecke.good{
   border-color:#4CAF50 !important;
   background:#0f1b12 !important;
@@ -105,6 +104,189 @@ button:hover { background:#e53935; }
   min-height:18px;
   font-size:14px;
   color:#cccccc;
+}
+
+/* Kapitel 3: Risikomodus */
+#risk-entry, #risk-container{
+  display:none;
+  flex-direction:column;
+  text-align:center;
+  max-height:520px;
+  overflow-y:auto;
+  margin-top:12px;
+}
+
+.risk-box{
+  background:#141414;
+  border:2px solid #c62828;
+  border-radius:18px;
+  padding:14px;
+  text-align:left;
+  margin-top:10px;
+}
+
+.risk-title{
+  font-size:22px;
+  margin:4px 0 8px;
+  color:#ff2020;
+  text-shadow:0 0 10px rgba(255,32,32,0.35);
+  letter-spacing:0.3px;
+}
+
+.risk-small{
+  font-size:13px;
+  color:#cccccc;
+  line-height:1.35;
+}
+
+.risk-stats{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.risk-pill{
+  padding:8px 10px;
+  border-radius:14px;
+  background:#1f1f1f;
+  border:1px solid rgba(198,40,40,0.55);
+  font-size:13px;
+  color:#fff;
+}
+
+.risk-actions{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+.risk-actions button{
+  padding:10px 18px;
+  border-radius:18px;
+  font-size:15px;
+}
+
+.btn-secondary{
+  background:#333 !important;
+}
+.btn-secondary:hover{
+  background:#444 !important;
+}
+
+.risk-level-title{
+  margin-top:10px;
+  font-size:16px;
+  color:#ffb3b3;
+}
+
+.risk-area{
+  margin-top:12px;
+  text-align:left;
+}
+
+.risk-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+
+.match-col{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.match-item{
+  background:#222;
+  border:1px solid rgba(198,40,40,0.55);
+  border-radius:12px;
+  padding:10px 10px;
+  cursor:pointer;
+  text-align:center;
+  user-select:none;
+}
+.match-item:hover{ background:#2b2b2b; }
+
+.match-item.selected{
+  outline:2px solid #4CAF50;
+  background:#1d2b1f;
+}
+.match-item.done{
+  opacity:0.55;
+  cursor:default;
+}
+
+.risk-note{
+  margin-top:10px;
+  min-height:18px;
+  font-size:14px;
+  color:#cccccc;
+}
+
+.order-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:10px;
+}
+.order-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.order-row select{
+  flex:1;
+  background:#111;
+  color:#fff;
+  border:1px solid rgba(198,40,40,0.55);
+  border-radius:12px;
+  padding:10px;
+  font-size:14px;
+  outline:none;
+}
+
+.letters-wrap{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.letter-btn{
+  background:#222;
+  border:1px solid rgba(198,40,40,0.55);
+  color:#fff;
+  border-radius:12px;
+  padding:10px 12px;
+  cursor:pointer;
+  user-select:none;
+}
+.letter-btn:disabled{
+  opacity:0.55;
+  cursor:default;
+}
+.letter-btn.used{
+  background:#c62828 !important;
+  border-color:#ff5252 !important;
+  color:#fff !important;
+  opacity:1 !important;
+}
+
+/* ✅ Level 6: Tasten verschwinden ohne Verschieben */
+.letter-btn.vanish{
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+.letters-progress{
+  margin-top:10px;
+  font-size:16px;
+  letter-spacing:2px;
+  background:#111;
+  border:1px solid rgba(198,40,40,0.55);
+  border-radius:12px;
+  padding:10px 12px;
 }
 
 /* Ergebnisseite */
@@ -202,6 +384,56 @@ tr.me-row td:first-child{
     <button id="reset-btn">Zurücksetzen</button>
     <button id="chapter2-next-btn">Weiter</button>
     <div id="chapter2-feedback"></div>
+  </div>
+
+  <!-- Kapitel 3: Einstieg Risikomodus -->
+  <div id="risk-entry">
+    <div class="risk-title">Risikomodus</div>
+    <div class="risk-box">
+      <div class="risk-small">
+        Du kannst jetzt freiwillig in den <b>Risikomodus</b> gehen.<br><br>
+        ✅ Du sammelst <b>Zusatzpunkte</b> in einem eigenen Risiko-Topf.<br>
+        ❌ <b>Ein Fehler</b> oder <b>Timer abgelaufen</b> = Risiko-Topf wird <b>0</b>.<br><br>
+        Deine bisherigen Punkte bleiben in jedem Fall sicher.
+      </div>
+      <div class="risk-stats" style="margin-top:12px;">
+        <div class="risk-pill">Level 1: +20</div>
+        <div class="risk-pill">Level 2: +20</div>
+        <div class="risk-pill">Level 3: +40</div>
+        <div class="risk-pill">Level 4: +80</div>
+        <div class="risk-pill">Level 5: +160</div>
+        <div class="risk-pill">Level 6: +320</div>
+      </div>
+    </div>
+
+    <div class="risk-actions">
+      <button id="risk-start-btn">Risikomodus starten</button>
+      <button id="risk-skip-btn" class="btn-secondary">Direkt zur Rangliste</button>
+    </div>
+    <div class="risk-note" id="risk-entry-note"></div>
+  </div>
+
+  <!-- Kapitel 3: Risikomodus -->
+  <div id="risk-container">
+    <div class="risk-title">Risikomodus</div>
+
+    <div class="risk-stats">
+      <div class="risk-pill" id="riskBasePill">Basis: 0</div>
+      <div class="risk-pill" id="riskPotPill">Risiko-Topf: 0</div>
+      <div class="risk-pill" id="riskLevelPill">Level: 1/6</div>
+      <div class="risk-pill" id="riskTimerPill">⏱️ 0s</div>
+    </div>
+
+    <div class="risk-level-title" id="riskLevelTitle">Level 1</div>
+
+    <div class="risk-area" id="riskArea"></div>
+
+    <div class="risk-actions">
+      <button id="risk-action-btn">Level betreten</button>
+      <button id="risk-cashout-btn" class="btn-secondary" style="display:none;">Aufhören & Punkte mitnehmen</button>
+    </div>
+
+    <div class="risk-note" id="risk-note"></div>
   </div>
 
   <!-- Ergebnis -->
@@ -304,9 +536,7 @@ function shuffle(arr){
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
-
-// ===============================
+}// ===============================
 // Firestore Ranking (pro Gerät bester Versuch)
 // ===============================
 async function saveScoreToFirestore(rawName, points){
@@ -404,7 +634,7 @@ for(let i=0;i<25;i++){
 }
 
 // ===============================
-// Kapitel 1: Originalfragen (20)
+// Kapitel 1: Multiple Choice (20)
 // ===============================
 const quiz = [
   {q:"Welche Kammer des Herzens pumpt Blut in den Lungenkreislauf?",a:["Linker Vorhof","Rechter Vorhof","Linke Kammer","Rechte Kammer"],correct:3},
@@ -432,6 +662,12 @@ const quiz = [
 let currentQuestion=0;
 let mcScore=0;
 let lueckenScore=0;
+
+// Scores
+let baseScore = 0;  // Basis nach Kapitel 1 + 2
+let riskScore = 0;  // Risikomodus-Topf
+let finalScore = 0; // Basis + Risiko
+let savedOnce = false;
 
 const heart=document.getElementById("heart");
 const card=document.getElementById("card");
@@ -524,7 +760,7 @@ nextBtn.addEventListener("click", ()=>{
   }
 });
 
-// ======= SPLIT HIER =======// ======================
+// ======= SPLIT HIER (2/4 Ende) =======//// ======================
 // Kapitel 2 (Lückentext)
 // ======================
 const chapter2Text=`Das sauerstoffarme Blut aus dem Körper fließt über die *obere Hohlvene* und die *untere Hohlvene* in den *rechten Vorhof*. 
@@ -551,13 +787,11 @@ function startChapter2(){
 
   let selectedId = null;
 
-  // ✅ Wörterbank: einmalig gemischt, bleibt dann stabil (damit’s nicht nervig springt)
+  // ✅ Wörterbank gemischt, bleibt stabil
   const order = shuffle(wordItems.map(it => it.id));
 
-  // ✅ Zustand: erst auswerten & zeigen, dann weiter zur Rangliste
+  // ✅ Zustand
   let graded = false;
-  let totalScore = 0;
-  let savedOnce = false;
 
   function renderBank(){
     bank.innerHTML = "";
@@ -582,13 +816,11 @@ function startChapter2(){
   renderBank();
 
   function lockChapter2(){
-    // bank & reset deaktivieren
     bank.querySelectorAll("span").forEach(s=>s.classList.add("disabled"));
     resetBtn.disabled = true;
     resetBtn.style.opacity = "0.5";
     resetBtn.style.cursor = "default";
 
-    // lücken klick deaktivieren
     container.querySelectorAll(".luecke").forEach(l=>{
       l.classList.add("locked");
       l.style.pointerEvents = "none";
@@ -631,20 +863,14 @@ function startChapter2(){
   };
 
   nextBtn.onclick = async () => {
-    // 2. Klick: zur Rangliste
+    // 2. Klick: weiter zum Risikomodus
     if(graded){
       document.getElementById("chapter2-container").style.display="none";
-      document.getElementById("result-page").style.display="flex";
-
-      heart.textContent="🏆";
-      bgHearts.forEach(h=>h.innerHTML="🏆");
-      card.style.borderColor="#FFD700";
-
-      await renderRanking();
+      showRiskEntry();
       return;
     }
 
-    // 1. Klick: auswerten + richtig/falsch markieren
+    // 1. Klick: auswerten + markieren
     graded = true;
     lueckenScore = 0;
 
@@ -662,7 +888,6 @@ function startChapter2(){
       if (need.has(a) && need.has(b) && a !== "" && b !== "" && a !== b) {
         lueckenScore += 2;
         venaHandled = true;
-
         venaOber.classList.add("good");
         venaUnter.classList.add("good");
       }
@@ -672,7 +897,6 @@ function startChapter2(){
       const expected = l.dataset.word;
       const filled = (l.textContent || "").trim();
 
-      // schon als richtig markiert (ober/untere Hohlvene)
       if (venaHandled && (expected === "obere Hohlvene" || expected === "untere Hohlvene")) return;
 
       if(filled === expected){
@@ -684,31 +908,755 @@ function startChapter2(){
       }
     });
 
-    // ✅ Punkte x10
-    totalScore = (mcScore + lueckenScore) * 10;
+    // ✅ Basis = (MC + Lücken) * 10
+    baseScore = (mcScore + lueckenScore) * 10;
 
-    // speichern (nur einmal)
-    if(!savedOnce){
-      savedOnce = true;
-      const rawName = localStorage.getItem("playerName") || "Unbekannt";
-      const safeName = normalizeSpaces(rawName);
-
-      try{
-        await saveScoreToFirestore(safeName, totalScore);
-      }catch(e){
-        console.log("Firestore Save Error:", e);
-        alert("Konnte nicht speichern (Firestore). Prüfe Internet & Firestore-Regeln.");
-      }
-    }
-
-    // UI: sperren + Hinweis + Button ändern
     lockChapter2();
-    feedbackEl.textContent = `Auswertung fertig ✅ Du hast im Lückentext ${lueckenScore} Punkte. (Gesamt: ${totalScore})`;
-    nextBtn.textContent = "Zur Rangliste";
+    feedbackEl.textContent = `Auswertung fertig ✅ Du hast im Lückentext ${lueckenScore} Punkte. (Basis: ${baseScore})`;
+    nextBtn.textContent = "Weiter";
     renderBank();
   };
 }
 
+// ======================
+// Kapitel 3: Risikomodus
+// ======================
+const riskEntry = document.getElementById("risk-entry");
+const riskContainer = document.getElementById("risk-container");
+const riskStartBtn = document.getElementById("risk-start-btn");
+const riskSkipBtn = document.getElementById("risk-skip-btn");
+
+const riskBasePill = document.getElementById("riskBasePill");
+const riskPotPill  = document.getElementById("riskPotPill");
+const riskLevelPill= document.getElementById("riskLevelPill");
+const riskTimerPill= document.getElementById("riskTimerPill");
+const riskLevelTitle = document.getElementById("riskLevelTitle");
+const riskArea = document.getElementById("riskArea");
+const riskActionBtn = document.getElementById("risk-action-btn");
+const riskCashoutBtn = document.getElementById("risk-cashout-btn");
+const riskNote = document.getElementById("risk-note");
+
+let riskLevel = 1;
+const riskMaxLevel = 6;
+
+// Rewards bleiben so
+const riskRewards = [20,20,40,80,160,320];
+
+// Zeitlimits wie von dir festgelegt: Lv1 90s, Lv2 90s, Lv3 60s, Lv4 60s, Lv5 30s, Lv6 200s
+const riskTimeLimits = [90,90,60,60,30,200];
+
+let riskTimer = null;
+let riskTimeLeft = 0;
+
+// State + Buchstabensalat-Timer
+let levelState = {};
+let bsTimers = [];
+let bsLastMinuteTriggered = false;
+
+const levelInfo = {
+  1: { title: "Zuordnen", desc: "Tippen um Deutsch mit Latein zu verbinden.<br>Nach jedem verbundenen Paar auf „prüfen“ klicken um das Paar einzuloggen." },
+  2: { title: "Chips", desc: "Setze 4 Begriffe korrekt in 4 Lücken (erst Lücke, dann Chip)." },
+  3: { title: "Reihenfolge", desc: "Sortiere einen Blutfluss-Ausschnitt in die richtige Reihenfolge." },
+  4: { title: "Wahr/Falsch", desc: "Bewerte alle 6 Aussagen." },
+  5: { title: "Falsche Aussage", desc: "Wähle die eine falsche Aussage aus mehreren Optionen." },
+  6: { title: "Buchstabensalat", desc: "Setze den gesuchten Begriff zusammen. Nicht alle Buchstaben gehören zum Wort." }
+};
+
+function clearBuchstabenTimers(){
+  bsTimers.forEach(t=>clearTimeout(t));
+  bsTimers = [];
+  bsLastMinuteTriggered = false;
+}
+
+function setOrangeMood(){
+  heart.textContent="🎲";
+  bgHearts.forEach(h=>h.innerHTML="🎲");
+  card.style.borderColor="#FF9800";
+  heart.style.animation="pulse 1s infinite";
+}
+
+function updateRiskHUD(){
+  riskBasePill.textContent = `Basis: ${baseScore}`;
+  riskPotPill.textContent  = `Risiko-Topf: ${riskScore}`;
+  riskLevelPill.textContent= `Level: ${riskLevel}/${riskMaxLevel}`;
+  riskTimerPill.textContent= `⏱️ ${Math.max(0, riskTimeLeft)}s`;
+  riskLevelTitle.textContent = `Level ${riskLevel} → +${riskRewards[riskLevel-1]} Punkte`;
+}
+
+function stopRiskTimer(){
+  if(riskTimer){
+    clearInterval(riskTimer);
+    riskTimer = null;
+  }
+}
+
+function startRiskTimer(seconds){
+  stopRiskTimer();
+  riskTimeLeft = seconds;
+  updateRiskHUD();
+  riskTimer = setInterval(()=>{
+    riskTimeLeft--;
+
+    // Level 6: "letzte Minute" triggern
+    if(riskLevel === 6 && !bsLastMinuteTriggered && riskTimeLeft <= 60){
+      bsLastMinuteTriggered = true;
+      try{ window.__bsTriggerLastMinute && window.__bsTriggerLastMinute(); }catch(e){}
+    }
+
+    updateRiskHUD();
+
+    if(riskTimeLeft <= 0){
+      stopRiskTimer();
+      clearBuchstabenTimers();
+      failRisk("Zeit abgelaufen ⏱️ Risiko-Topf = 0.");
+    }
+  }, 1000);
+}
+
+function showRiskEntry(){
+  riskScore = 0;
+  riskLevel = 1;
+  stopRiskTimer();
+  clearBuchstabenTimers();
+  riskTimeLeft = 0;
+
+  setOrangeMood();
+  riskEntry.style.display="flex";
+  riskContainer.style.display="none";
+  document.getElementById("risk-entry-note").textContent = `Deine Basis ist ${baseScore} Punkte. Risikopunkte kommen oben drauf.`;
+}
+
+riskSkipBtn.addEventListener("click", async ()=>{
+  riskScore = 0;
+  finalScore = baseScore;
+  await finalizeAndShowRanking();
+});
+
+riskStartBtn.addEventListener("click", ()=>{
+  riskEntry.style.display="none";
+  riskContainer.style.display="flex";
+  startRiskLevel(1);
+});
+
+riskCashoutBtn.addEventListener("click", async ()=>{
+  stopRiskTimer();
+  clearBuchstabenTimers();
+  finalScore = baseScore + riskScore;
+  await finalizeAndShowRanking();
+});
+
+function failRisk(msg){
+  riskScore = 0;
+  updateRiskHUD();
+  riskNote.textContent = msg + " Weiter geht's zur Rangliste…";
+  setTimeout(async ()=>{
+    finalScore = baseScore + riskScore;
+    await finalizeAndShowRanking();
+  }, 850);
+}
+
+function passRiskLevel(){
+  const reward = riskRewards[riskLevel-1] || 0;
+  riskScore += reward;
+
+  riskNote.textContent = `Geschafft ✅ +${reward} Risikopunkte!`;
+  stopRiskTimer();
+  clearBuchstabenTimers();
+
+  setTimeout(()=>{
+    if(riskLevel >= riskMaxLevel){
+      (async ()=>{
+        finalScore = baseScore + riskScore;
+        await finalizeAndShowRanking();
+      })();
+      return;
+    }
+    riskLevel++;
+    startRiskLevel(riskLevel);
+  }, 700);
+}
+
+function startRiskLevel(level){
+  levelState = {};
+  riskNote.textContent = "";
+  setOrangeMood();
+  clearBuchstabenTimers();
+
+  riskTimeLeft = riskTimeLimits[level-1] || 60;
+  updateRiskHUD();
+
+  const info = levelInfo[level] || { title:"", desc:"" };
+  const reward = riskRewards[level-1] || 0;
+
+  const isLevel6 = (level === 6);
+  const isLevel4 = (level === 4);
+
+  const extraHints = isLevel6
+    ? `<div style="margin-top:8px;color:#ffb3b3;">Hinweise: nach <b>30s</b>, nach <b>60s</b> und <b>in der letzten Minute</b>.</div>`
+    : ``;
+
+  const extraLoginNote = isLevel4
+    ? `<div style="margin-top:8px;color:#ffb3b3;"><b>Erst prüfen, wenn alles eingeloggt ist.</b></div>`
+    : ``;
+
+  riskArea.innerHTML = `
+    <div class="risk-box">
+      <div class="risk-title">Level ${level}: ${info.title}</div>
+      ${isLevel6 ? `<div style="color:#ffb3b3;font-weight:bold;margin-top:-2px;">(sehr schwer!)</div>` : ``}
+      <div class="risk-small" style="margin-top:8px;">
+        ${info.desc}
+        ${extraHints}
+        ${extraLoginNote}
+        <br><br>
+        ✅ <b>Gewinn:</b> +${reward} Risikopunkte<br>
+        ❌ <b>Niederlage:</b> Risiko-Topf wird <b>0</b> und du gehst zur Rangliste<br>
+        ⏱️ <b>Zeitlimit:</b> ${riskTimeLeft} Sekunden
+        <br><br>
+        <b>Willst du Level ${level} betreten?</b>
+      </div>
+    </div>
+  `;
+
+  riskCashoutBtn.style.display = "inline-block";
+  riskActionBtn.textContent = `Level ${level} betreten`;
+  riskActionBtn.onclick = ()=> beginRiskLevel(level);
+}
+
+function beginRiskLevel(level){
+  levelState = {};
+  riskNote.textContent = "";
+  setOrangeMood();
+  clearBuchstabenTimers();
+
+  riskCashoutBtn.style.display = "none";
+  startRiskTimer(riskTimeLimits[level-1] || 60);
+
+  if(level === 1) renderLevel1_Match();
+  if(level === 2) renderLevel2_Chips();
+  if(level === 3) renderLevel3_Order();
+  if(level === 4) renderLevel4_TrueFalse6();
+  if(level === 5) renderLevel5_FindWrong9();
+  if(level === 6) renderLevel6_Buchstabensalat();
+}
+
+// ======= SPLIT HIER (3/4 Ende) =======//// ======================
+// LEVEL 1: Match (Intro minimal, Level selbst nur Satz 2)
+// ======================
+function renderLevel1_Match(){
+  riskActionBtn.textContent = "Prüfen";
+
+  const pairs = [
+    {de:"Brustbein", la:"Sternum"},
+    {de:"Rippe", la:"Costa"},
+    {de:"Herzbeutel", la:"Perikard"},
+    {de:"linker Vorhof", la:"Atrium sinistrum"},
+    {de:"rechte Kammer", la:"Ventriculus dexter"},
+  ];
+
+  const left = shuffle(pairs.map(p=>p.de));
+  const right = shuffle(pairs.map(p=>p.la));
+
+  levelState.leftSel = null;
+  levelState.rightSel = null;
+  levelState.matched = new Set();
+
+  riskArea.innerHTML = `
+    <div class="risk-small">
+      Nach jedem verbundenen Paar auf „prüfen“ klicken um das Paar einzuloggen.
+    </div>
+    <div class="risk-grid">
+      <div class="match-col" id="match-left"></div>
+      <div class="match-col" id="match-right"></div>
+    </div>
+  `;
+
+  const leftCol = document.getElementById("match-left");
+  const rightCol = document.getElementById("match-right");
+
+  function renderCols(){
+    leftCol.innerHTML = "";
+    rightCol.innerHTML = "";
+
+    left.forEach(text=>{
+      const done = Array.from(levelState.matched).some(k=>k.split("|")[0]===text);
+      const div = document.createElement("div");
+      div.className = "match-item" + (done ? " done" : "") + (levelState.leftSel === text ? " selected" : "");
+      div.textContent = text;
+      div.onclick = ()=>{
+        if(done) return;
+        levelState.leftSel = (levelState.leftSel === text) ? null : text;
+        renderCols();
+      };
+      leftCol.appendChild(div);
+    });
+
+    right.forEach(text=>{
+      const done = Array.from(levelState.matched).some(k=>k.split("|")[1]===text);
+      const div = document.createElement("div");
+      div.className = "match-item" + (done ? " done" : "") + (levelState.rightSel === text ? " selected" : "");
+      div.textContent = text;
+      div.onclick = ()=>{
+        if(done) return;
+        levelState.rightSel = (levelState.rightSel === text) ? null : text;
+        renderCols();
+      };
+      rightCol.appendChild(div);
+    });
+  }
+  renderCols();
+
+  riskActionBtn.onclick = ()=>{
+    if(!levelState.leftSel || !levelState.rightSel){
+      riskNote.textContent = "Wähle links und rechts je ein Feld.";
+      return;
+    }
+
+    const de = levelState.leftSel;
+    const la = levelState.rightSel;
+    const ok = pairs.some(p=>p.de===de && p.la===la);
+
+    if(ok){
+      levelState.matched.add(`${de}|${la}`);
+      levelState.leftSel = null;
+      levelState.rightSel = null;
+      riskNote.textContent = "Richtig ✅";
+      renderCols();
+      if(levelState.matched.size === 5) passRiskLevel();
+    }else{
+      failRisk("Falsche Zuordnung ❌");
+    }
+  };
+}
+
+// ======================
+// LEVEL 2: Chips (4 Lücken + nur 1 Fake)
+// ======================
+function renderLevel2_Chips(){
+  riskActionBtn.textContent = "Prüfen";
+
+  const blanks = [
+    {key:"b1", label:"1)", text:"… ist eine Segelklappe zwischen rechtem Vorhof und rechter Kammer.", answer:"Trikuspidalklappe"},
+    {key:"b2", label:"2)", text:"… ist eine Taschenklappe zwischen linker Kammer und Aorta.", answer:"Aortenklappe"},
+    {key:"b3", label:"3)", text:"… ist die Segelklappe zwischen linkem Vorhof und linker Kammer.", answer:"Mitralklappe"},
+    {key:"b4", label:"4)", text:"… ist die Taschenklappe zwischen rechter Kammer und Lungenarterie.", answer:"Pulmonalklappe"}
+  ];
+
+  const chips = shuffle(["Trikuspidalklappe","Aortenklappe","Mitralklappe","Pulmonalklappe","Sinusknoten"]); // 1 Fake
+
+  levelState.filled = { b1:"", b2:"", b3:"", b4:"" };
+  levelState.activeBlank = null;
+
+  riskArea.innerHTML = `
+    <div class="risk-small">Erst Lücke auswählen, dann Chip anklicken.</div>
+    <div class="risk-box" style="margin-top:10px;" id="chipsBox"></div>
+    <div class="letters-wrap" id="chipsWrap" style="margin-top:12px;"></div>
+  `;
+
+  const box = document.getElementById("chipsBox");
+  const wrap = document.getElementById("chipsWrap");
+
+  function makeBlankRow(b){
+    const row = document.createElement("div");
+    row.style.marginBottom = "12px";
+    row.innerHTML = `
+      <div style="color:#aaa;font-size:13px;margin-bottom:6px;">${b.label}</div>
+      <span class="luecke" id="blank_${b.key}" style="min-width:240px; text-align:center;">${b.label} Lücke</span>
+      <div style="margin-top:6px;color:#ccc;font-size:13px;">${b.text}</div>
+    `;
+    box.appendChild(row);
+  }
+
+  blanks.forEach(makeBlankRow);
+
+  const blankEls = {};
+  blanks.forEach(b => blankEls[b.key] = document.getElementById(`blank_${b.key}`));
+
+  function setActive(key){
+    levelState.activeBlank = key;
+    Object.values(blankEls).forEach(el=>{
+      el.style.outline = "none";
+      el.style.background = "#111";
+      el.style.borderColor = "#c62828";
+    });
+    const el = blankEls[key];
+    el.style.outline = "2px solid #4CAF50";
+    el.style.background = "#0f1b12";
+  }
+
+  blanks.forEach(b=>{
+    blankEls[b.key].onclick = ()=>setActive(b.key);
+  });
+
+  chips.forEach(ch=>{
+    const btn = document.createElement("button");
+    btn.className = "letter-btn";
+    btn.textContent = ch;
+    btn.onclick = ()=>{
+      if(!levelState.activeBlank){ riskNote.textContent = "Erst eine Lücke auswählen."; return; }
+      const key = levelState.activeBlank;
+      levelState.filled[key] = ch;
+      const el = blankEls[key];
+      el.textContent = ch;
+      el.classList.remove("good","bad");
+      riskNote.textContent = "";
+    };
+    wrap.appendChild(btn);
+  });
+
+  riskActionBtn.onclick = ()=>{
+    let allOk = true;
+
+    blanks.forEach(b=>{
+      const filled = (levelState.filled[b.key] || "").trim();
+      const ok = filled === b.answer;
+      allOk = allOk && ok;
+      blankEls[b.key].classList.toggle("good", ok);
+      blankEls[b.key].classList.toggle("bad", !ok);
+    });
+
+    if(allOk) passRiskLevel();
+    else failRisk("Mindestens eine Lücke falsch ❌");
+  };
+}
+
+// ======================
+// LEVEL 3: Reihenfolge
+// ======================
+function renderLevel3_Order(){
+  riskActionBtn.textContent = "Prüfen";
+
+  const correct = ["Rechter Vorhof","Rechte Kammer","Pulmonalarterie","Lunge","Linker Vorhof"];
+  const options = shuffle(correct.slice());
+  levelState.correct = correct;
+  levelState.selects = [];
+
+  riskArea.innerHTML = `
+    <div class="risk-small">Bringe den Blutfluss (Ausschnitt) in die richtige Reihenfolge.</div>
+    <div class="order-list" id="orderList"></div>
+  `;
+  const list = document.getElementById("orderList");
+
+  correct.forEach((_, idx)=>{
+    const row = document.createElement("div");
+    row.className = "order-row";
+    row.innerHTML = `<div style="width:20px;color:#aaa">${idx+1}.</div>`;
+    const sel = document.createElement("select");
+    sel.innerHTML = `<option value="">-- auswählen --</option>` + options.map(o=>`<option value="${o}">${o}</option>`).join("");
+    row.appendChild(sel);
+    list.appendChild(row);
+    levelState.selects.push(sel);
+  });
+
+  riskActionBtn.onclick = ()=>{
+    const chosen = levelState.selects.map(s=>s.value);
+    if(chosen.some(v=>!v)){ riskNote.textContent = "Bitte alle Felder auswählen."; return; }
+    const ok = chosen.every((v,i)=> v === levelState.correct[i]);
+    if(ok) passRiskLevel(); else failRisk("Reihenfolge falsch ❌");
+  };
+}
+
+// ======================
+// LEVEL 4: Wahr/Falsch (6 Aussagen) + Hinweis ohne Klammern
+// ======================
+function renderLevel4_TrueFalse6(){
+  riskActionBtn.textContent = "Prüfen";
+
+  const items = [
+    {t:"Die Aortenklappe ist eine Taschenklappe.", ok:true},
+    {t:"Die Lungenvenen führen sauerstoffarmes Blut zum Herzen.", ok:false},
+    {t:"Der Sinusknoten gibt normalerweise den Herzrhythmus vor.", ok:true},
+    {t:"Arterien führen Blut vom Herzen weg.", ok:true},
+    {t:"Venen besitzen häufig Klappen, um Rückfluss zu verhindern.", ok:true},
+    {t:"Kapillaren sind größer als Arterien.", ok:false},
+  ];
+  levelState.answers = new Map();
+
+  riskArea.innerHTML = `
+    <div class="risk-small">
+      Bewerte alle 6 Aussagen.<br>
+      <b>Erst prüfen, wenn alles eingeloggt ist.</b>
+    </div>
+    <div class="risk-box" id="tfBox"></div>
+  `;
+  const box = document.getElementById("tfBox");
+
+  items.forEach((it, idx)=>{
+    const wrap = document.createElement("div");
+    wrap.style.marginBottom = "10px";
+    wrap.innerHTML = `
+      <div style="margin-bottom:6px">${idx+1}) ${it.t}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-secondary" data-idx="${idx}" data-val="true" style="padding:8px 12px;border-radius:14px;">Wahr</button>
+        <button class="btn-secondary" data-idx="${idx}" data-val="false" style="padding:8px 12px;border-radius:14px;">Falsch</button>
+      </div>
+    `;
+    box.appendChild(wrap);
+  });
+
+  box.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const idx = Number(btn.dataset.idx);
+      const val = btn.dataset.val === "true";
+      levelState.answers.set(idx, val);
+
+      const row = btn.parentElement;
+      row.querySelectorAll("button").forEach(b=>{
+        b.style.outline = "none";
+        b.style.background = "#333";
+      });
+      btn.style.outline = "2px solid #4CAF50";
+      btn.style.background = "#1d2b1f";
+    });
+  });
+
+  riskActionBtn.onclick = ()=>{
+    if(levelState.answers.size !== items.length){
+      riskNote.textContent = "Bitte alle 6 Aussagen bewerten.";
+      return;
+    }
+    const ok = items.every((it, idx)=> levelState.answers.get(idx) === it.ok);
+    if(ok) passRiskLevel(); else failRisk("Mindestens eine Aussage falsch ❌");
+  };
+}
+
+// ======================
+// LEVEL 5: Falsche Aussage (9 Optionen)
+// ======================
+function renderLevel5_FindWrong9(){
+  riskActionBtn.textContent = "Bestätigen";
+
+  const truths = [
+    "Die Mitralklappe liegt zwischen linkem Vorhof und linker Kammer.",
+    "Die Aorta transportiert Blut in den Körperkreislauf.",
+    "Kapillaren sind die kleinsten Blutgefäße.",
+    "Der Sinusknoten liegt im rechten Vorhof.",
+    "Die Pulmonalklappe verhindert Rückfluss in die rechte Kammer.",
+    "Arterien haben im Vergleich zu Venen meist dickere Wände.",
+    "Das Septum trennt die rechte und linke Herzhälfte.",
+    "Die Lungenarterie führt sauerstoffarmes Blut zur Lunge."
+  ];
+  const wrong = "Alle Venen führen Blut immer zum Herzen.";
+  const options = truths.concat([wrong]);
+
+  levelState.pick = null;
+
+  riskArea.innerHTML = `
+    <div class="risk-small">Wähle die <b>falsche</b> Aussage.</div>
+    <div class="answers-wrap" id="fwWrap" style="margin-top:10px;"></div>
+  `;
+  const wrap = document.getElementById("fwWrap");
+
+  options.forEach((t, idx)=>{
+    const b = document.createElement("button");
+    b.className = "answer-btn";
+    b.textContent = t;
+    b.onclick = ()=>{
+      levelState.pick = idx;
+      wrap.querySelectorAll("button").forEach(x=>x.classList.remove("correct","wrong"));
+      b.classList.add("correct");
+    };
+    wrap.appendChild(b);
+  });
+
+  riskActionBtn.onclick = ()=>{
+    if(levelState.pick === null){ riskNote.textContent = "Bitte eine Aussage auswählen."; return; }
+    const pickedText = options[levelState.pick];
+    if(pickedText === wrong) passRiskLevel();
+    else failRisk("Das war nicht die falsche Aussage ❌");
+  };
+}
+
+// ======================
+// LEVEL 6: Buchstabensalat (Hinweise untereinander + Tasten bleiben, verschwinden als Lücke)
+// ======================
+function renderLevel6_Buchstabensalat(){
+  riskActionBtn.textContent = "Prüfen";
+
+  const target = "LUNGENKREISLAUF";
+  const targetLetters = target.split("");
+  const requiredCounts = {};
+  targetLetters.forEach(ch=> requiredCounts[ch] = (requiredCounts[ch]||0)+1);
+
+  // Decoys + Pool
+  const decoys = shuffle(["A","E","I","O","U","R","S","T","N","K","F","M","D","B","Z","H"]).slice(0,9);
+  const pool = shuffle(targetLetters.concat(decoys));
+
+  levelState.target = target;
+  levelState.current = "";
+  levelState.stack = [];
+
+  riskArea.innerHTML = `
+    <div class="risk-small">
+      <b>Buchstabensalat:</b> Setze den gesuchten Begriff zusammen. Nicht alle Buchstaben gehören zum Wort.
+      <div id="bsHints" style="margin-top:10px;color:#ff9e9e;line-height:1.35;">
+        <div>1. Hinweis: <span id="h1"></span></div>
+        <div>2. Hinweis: <span id="h2"></span></div>
+        <div>3. Hinweis: <span id="h3"></span></div>
+      </div>
+    </div>
+    <div class="letters-progress" id="bsProgress"></div>
+    <div class="letters-wrap" id="bsWrap"></div>
+    <div class="risk-actions" style="justify-content:flex-start;margin-top:10px;">
+      <button id="bsBack" class="btn-secondary" style="padding:8px 12px;border-radius:14px;">⌫ Löschen</button>
+      <button id="bsClear" class="btn-secondary" style="padding:8px 12px;border-radius:14px;">↩ Reset</button>
+    </div>
+  `;
+
+  const h1 = document.getElementById("h1");
+  const h2 = document.getElementById("h2");
+  const h3 = document.getElementById("h3");
+
+  const progress = document.getElementById("bsProgress");
+  const wrap = document.getElementById("bsWrap");
+  const back = document.getElementById("bsBack");
+  const clear = document.getElementById("bsClear");
+
+  function renderProgress(){
+    progress.textContent = levelState.current || "(noch leer)";
+  }
+  renderProgress();
+
+  const allButtons = [];
+
+  function vanish(btn){
+    if(!btn) return;
+    btn.disabled = true;
+    btn.classList.add("vanish"); // bleibt als Lücke
+  }
+
+  function lastMinuteHideFalseLetters(){
+    // erst alle, die gar nicht im Ziel vorkommen
+    allButtons.forEach(({ch, btn})=>{
+      if(!requiredCounts[ch]) vanish(btn);
+    });
+
+    // dann Überhänge (zu viele von einem Buchstaben) entfernen
+    const visibleByChar = {};
+    allButtons.forEach(({ch, btn})=>{
+      if(btn.classList.contains("vanish")) return;
+      visibleByChar[ch] = visibleByChar[ch] || [];
+      visibleByChar[ch].push(btn);
+    });
+
+    // zusätzlich: E, K, I, U rausnehmen (wie gewünscht), falls zu viele sichtbar
+    ["E","K","I","U"].forEach(ch=>{
+      const list = visibleByChar[ch] || [];
+      const req = requiredCounts[ch] || 0;
+      while(list.length > req){
+        vanish(list[list.length-1]);
+        list.pop();
+      }
+    });
+
+    // final: generisch reduzieren
+    Object.keys(visibleByChar).forEach(ch=>{
+      const req = requiredCounts[ch] || 0;
+      const list = visibleByChar[ch] || [];
+      while(list.length > req){
+        vanish(list[list.length-1]);
+        list.pop();
+      }
+    });
+  }
+
+  window.__bsTriggerLastMinute = ()=>{
+    h3.textContent = "Alle falschen Buchstaben verschwinden.";
+    lastMinuteHideFalseLetters();
+  };
+
+  // Hinweis 1 nach 30s
+  bsTimers.push(setTimeout(()=>{
+    if(riskLevel === 6 && riskTimer){ h1.textContent = `Das Wort hat ${target.length} Buchstaben.`; }
+  }, 30000));
+
+  // Hinweis 2 nach 60s
+  bsTimers.push(setTimeout(()=>{
+    if(riskLevel === 6 && riskTimer){ h2.textContent = "Es ist ein deutsches Wort. Kein Latein."; }
+  }, 60000));
+
+  // Buttons
+  pool.forEach(ch=>{
+    const btn = document.createElement("button");
+    btn.className = "letter-btn";
+    btn.textContent = ch;
+
+    btn.onclick = ()=>{
+      btn.disabled = true;
+      btn.classList.add("used");
+      levelState.current += ch;
+      levelState.stack.push({ ch, btn });
+      renderProgress();
+    };
+
+    wrap.appendChild(btn);
+    allButtons.push({ ch, btn });
+  });
+
+  back.onclick = ()=>{
+    if(levelState.stack.length === 0) return;
+    const last = levelState.stack.pop();
+    levelState.current = levelState.current.slice(0, -1);
+
+    // nur reaktivieren, wenn nicht "vanish"
+    if(last && last.btn && !last.btn.classList.contains("vanish")){
+      last.btn.disabled = false;
+      last.btn.classList.remove("used");
+    }
+    renderProgress();
+  };
+
+  clear.onclick = ()=>{
+    levelState.stack.forEach(x=>{
+      if(x.btn && !x.btn.classList.contains("vanish")){
+        x.btn.disabled = false;
+        x.btn.classList.remove("used");
+      }
+    });
+    levelState.stack = [];
+    levelState.current = "";
+    renderProgress();
+  };
+
+  riskActionBtn.onclick = ()=>{
+    const guess = (levelState.current || "").trim().toUpperCase();
+    if(!guess){ riskNote.textContent = "Du musst erst Buchstaben anklicken."; return; }
+    if(guess === levelState.target) passRiskLevel();
+    else failRisk("Falsches Wort ❌");
+  };
+}
+
+// ======================
+// Finale: Speichern + Rangliste
+// ======================
+async function finalizeAndShowRanking(){
+  stopRiskTimer();
+  clearBuchstabenTimers();
+  try{ window.__bsTriggerLastMinute = null; }catch(e){}
+
+  riskEntry.style.display = "none";
+  riskContainer.style.display = "none";
+  document.getElementById("chapter2-container").style.display = "none";
+  document.getElementById("result-page").style.display="flex";
+
+  heart.textContent="🏆";
+  bgHearts.forEach(h=>h.innerHTML="🏆");
+  card.style.borderColor="#FF9800";
+  heart.style.animation="pulse 1s infinite";
+
+  if(!savedOnce){
+    savedOnce = true;
+    const rawName = localStorage.getItem("playerName") || "Unbekannt";
+    const safeName = normalizeSpaces(rawName);
+    try{
+      await saveScoreToFirestore(safeName, finalScore);
+    }catch(e){
+      console.log("Firestore Save Error:", e);
+      alert("Konnte nicht speichern (Firestore). Prüfe Internet & Firestore-Regeln.");
+    }
+  }
+
+  await renderRanking();
+}
 </script>
 </body>
 </html>
